@@ -2,9 +2,10 @@ const router = require("express").Router();
 const fs = require("fs").promises;
 const functionContacts = require("../../model/index.js");
 
-const contacts = JSON.parse(
-  fs.readFileSync("./model/contacts.json", { encoding: "utf-8" })
-);
+const contacts = async () =>
+  JSON.parse(
+    await fs.readFileSync("../../model/contacts.json", { encoding: "utf-8" })
+  );
 
 router.get("/", async (req, res, next) => {
   const contactList = await functionContacts.listContacts();

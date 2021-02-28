@@ -1,9 +1,11 @@
 const fsx = require("fs");
+const { promises: fsPromises } = fsx;
 const path = require("path");
 
 const contactsPath = path.join(__dirname, "./contacts.json");
-console.log(contactsPath);
+
 const contactList = fsx.readFileSync(contactsPath, "utf-8");
+
 const contactsItems = JSON.parse(contactList);
 
 const listContacts = async () => {
@@ -49,18 +51,18 @@ const removeContact = async (contactId) => {
   return newContacts;
 };
 
-const addContact = async (body) => {
-  const { name, email, phone } = body;
-  contacts.push({
+const addContact = async (name, email, phone) => {
+  const newContact = {
     id: contactsItems.length + 1,
-    name: name,
-    email: email,
-    phone: phone,
-  });
+    name,
+    email,
+    phone,
+  };
+  contactsItems.push(newContact);
   console.log("Contacts added successfully! New lists of contacts: ");
   console.table(contactsItems);
 
-  fsx.writeFile(contactsPath, JSON.stringify(contactsItems), (error) => {
+  await fsx.writeFile(contactsPath, JSON.stringify(contactsItems), (error) => {
     if (error) {
       return console.log(error);
     }
@@ -69,8 +71,8 @@ const addContact = async (body) => {
   return contactsItems;
 };
 
-const updateContact = async (contactId, body) => {
-  const { name, email, phone } = body;
+const updateContact = async (contactId, name,email,phone) => {
+  
   const contact = await contactsItems.find((contact) => {
     if (contact.id === contactId) {
       contact.name = name;

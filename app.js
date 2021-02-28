@@ -15,17 +15,7 @@ app.get("/", function (req, res) {
   res.send("DataBase of Contacts");
 });
 
-app.use("/api", contactsRouter);
-
-// app.use('*', (req, res) => {
-//     res.status(404).json({
-//         get_contacts: 'http://localhost:3000/api/contacts',
-//         create_contacts: 'http://localhost:3000/api/contacts',
-//         find_contact: 'http://localhost:3000/api/contacts/:contactId',
-//         delete_contacts: 'http://localhost:3000/api/contacts/:contactId',
-//         update_contacts: 'http://localhost:3000/api/contacts/:contactId',
-//     });
-// });
+app.use("/api/contacts", contactsRouter);
 
 app.use((_, res, __) => {
   res.status(404).json({
