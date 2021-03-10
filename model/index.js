@@ -1,101 +1,32 @@
-const fsx = require("fs");
-const { promises: fsPromises } = fsx;
-const path = require("path");
-
-const contactsPath = path.join(__dirname, "./contacts.json");
-
-const contactList = fsx.readFileSync(contactsPath, "utf-8");
-
-const contactsItems = JSON.parse(contactList);
+const Contacts = require("./schemas/contact-schema");
 
 const listContacts = async () => {
-  console.log("List of contacts: ");
-  console.table(contactsItems);
-
-  return contactsItems;
+  const results = await Contacts.find();
+  return results;
 };
 
-const getContactById = async (contactId) => {
-  const foundContact = await contactsItems.find((contact) => {
-    if (contact.id === contactId) {
-      console.log(`Get contact by ID=${contactId}:`);
-      console.table(contact);
-      return contact;
-    }
-  });
-  if (!foundContact) {
-    console.log("error");
-  }
-
-  return foundContact;
+const getContactById = async (id) => {
+  const result = await Contacts.findOne({ _id: id });
+  return result;
 };
 
-const removeContact = async (contactId) => {
-  const newContacts = await contactsItems.filter(
-    (contact) => contact.id !== contactId
+const addContact = async (body) => {
+  const result = await Contacts.create(body);
+  return result;
+};
+
+const updateContact = async (id, body) => {
+  const result = await Contacts.findByIdAndUpdate(
+    { _id: id },
+    { ...body },
+    { new: true }
   );
-  if (newContacts.length === contactsItems.length) {
-    console.log("error");
-    return contactsItems;
-  }
-
-  console.log("Contact deleted successfully! New list of contacts: ");
-  console.table(newContacts);
-
-  fsx.writeFile(contactsPath, JSON.stringify(newContacts), (error) => {
-    if (error) {
-      return console.log("error :", error);
-    }
-  });
-
-  return newContacts;
+  return result;
 };
 
-const addContact = async (name, email, phone) => {
-  const newContact = {
-    id: contactsItems.length + 1,
-    name,
-    email,
-    phone,
-  };
-  contactsItems.push(newContact);
-  console.log("Contacts added successfully! New lists of contacts: ");
-  console.table(contactsItems);
-
-  await fsx.writeFile(contactsPath, JSON.stringify(contactsItems), (error) => {
-    if (error) {
-      return console.log(error);
-    }
-  });
-
-  return contactsItems;
-};
-
-const updateContact = async (contactId, name,email,phone) => {
-  
-  const contact = await contactsItems.find((contact) => {
-    if (contact.id === contactId) {
-      contact.name = name;
-      contact.email = email;
-      contact.phone = phone;
-      console.log(`Contact with ID ${contactId} updated!`);
-      console.table(contactsItems);
-      return contact;
-    }
-  });
-
-  if (contact == null) {
-    console.log("error");
-    return;
-  }
-
-  fsx.writeFile(contactsPath, JSON.stringify(contactsItems), (error) => {
-    if (error) {
-      return console.log(error);
-    }
-  });
-
-  return contactsItems;
+const removeContact = async (id) => {
+  const result = await Contacts.findByIdAndRemove({ _id: id });
+  return result;
 };
 
 module.exports = {
