@@ -1,9 +1,11 @@
-const Contacts = require("../model");
+const Contacts = require("../model/contacts");
 
-const getAllContacts = async (req, res, next) => {
+async function getAllContacts(req, res, next) {
   try {
-    const contacts = await Contacts.listContacts();
-    return res.json({
+    const userId = req.user.id;
+
+    const contacts = await Contacts.listContacts(userId, req.query);
+    return res.status(200).json({
       status: "success",
       code: 200,
       data: {
@@ -13,13 +15,14 @@ const getAllContacts = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-};
+}
 
-const getContactById = async (req, res, next) => {
+async function getById(req, res, next) {
   try {
-    const contact = await Contacts.getContactById(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await Contacts.getContactById(req.params.id, userId);
     if (contact) {
-      return res.json({
+      return res.status(200).json({
         status: "success",
         code: 200,
         data: {
@@ -36,11 +39,12 @@ const getContactById = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-};
+}
 
-const createContact = async (req, res, next) => {
+async function createContact(req, res, next) {
   try {
-    const contact = await Contacts.addContact(req.body);
+    const userId = req.user.id;
+    const contact = await Contacts.addContact({ ...req.body, owner: userId });
     return res.status(201).json({
       status: "success",
       code: 201,
@@ -51,13 +55,14 @@ const createContact = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-};
+}
 
-const deleteContact = async (req, res, next) => {
+async function deleteContact(req, res, next) {
   try {
-    const contact = await Contacts.removeContact(req.params.contactId);
+    const userId = req.user.id;
+    const contact = await Contacts.removeContact(req.params.id, userId);
     if (contact) {
-      return res.json({
+      return res.status(200).json({
         status: "success",
         code: 200,
         data: {
@@ -74,24 +79,20 @@ const deleteContact = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-};
+}
 
-const patchContact = async (req, res, next) => {
+async function patchContact(req, res, next) {
   try {
-    if (Object.keys(req.body).length === 0) {
-      return res.status(400).json({
-        status: "missing fields",
-        code: 400,
-      });
-    }
+    const userId = req.user.id;
 
     const contact = await Contacts.updateContact(
-      req.params.contactId,
-      req.body
+      req.params.id,
+      req.body,
+      userId
     );
 
     if (contact) {
-      return res.json({
+      return res.status(200).json({
         status: "success",
         code: 200,
         data: {
@@ -108,11 +109,11 @@ const patchContact = async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-};
+}
 
 module.exports = {
   getAllContacts,
-  getContactById,
+  getById,
   createContact,
   deleteContact,
   patchContact,
